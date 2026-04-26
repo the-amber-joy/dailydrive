@@ -42,7 +42,7 @@ fi
 # --- Run the full playlist refresh ---
 echo "=== Daily full refresh started at $(date) ===" >> "${LOG_FILE}"
 cd "${DAILYDRIVE_DIR}"
-/usr/bin/node index.js >> "${LOG_FILE}" 2>&1
+/usr/local/node20/bin/node index.js >> "${LOG_FILE}" 2>&1
 EXIT_CODE=$?
 echo "=== Daily full refresh finished at $(date) (exit code: ${EXIT_CODE}) ===" >> "${LOG_FILE}"
 echo "" >> "${LOG_FILE}"

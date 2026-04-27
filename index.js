@@ -283,7 +283,10 @@ async function fetchMusicTracks(spotifyApi, musicConfig) {
   }
   allTracks = allTracks.slice(0, totalSongs);
 
-  console.log(`🎵 Selected ${allTracks.length} songs`);
+  console.log(`🎵 Selected ${allTracks.length} songs:`);
+  allTracks.forEach((track, i) => {
+    console.log(`    ${String(i + 1).padStart(2)}. ${track.name} — ${track.artist}`);
+  });
   return allTracks;
 }
 

@@ -375,11 +375,11 @@ async function fetchGenreTracks(spotifyApi, genres, count) {
  * The pattern repeats cyclically. When one content type runs out, the remaining
  * items of the other type are appended at the end.
  */
-function mixContent(episodes, tracks, pattern) {
+function mixContent(episodes, tracks, pattern, startOffset = 0) {
   const mixed = [];
   let episodeIndex = 0;
   let trackIndex = 0;
-  let patternIndex = 0;
+  let patternIndex = startOffset;
 
   const mixPattern = pattern || "PMMM";
 
@@ -419,6 +419,28 @@ function mixContent(episodes, tracks, pattern) {
   }
 
   return mixed;
+}
+
+/**
+ * When pinned episodes are already placed first, starting a pattern like "PMMMM"
+ * at index 0 causes back-to-back podcasts. This returns a safer start index so
+ * the interleave starts on the first music slot when available.
+ */
+function getPatternStartOffset(pattern, hasPinnedFirst) {
+  const mixPattern = pattern || "PMMM";
+
+  if (!hasPinnedFirst || mixPattern.length === 0) {
+    return 0;
+  }
+
+  for (let i = 0; i < mixPattern.length; i++) {
+    const slot = mixPattern[i];
+    if (slot !== "P" && slot !== "p") {
+      return i;
+    }
+  }
+
+  return 0;
 }
 
 /**
@@ -609,9 +631,18 @@ async function main() {
 
   // Step 9: Mix podcasts and music according to the configured pattern
   console.log(`\n🔀 Mixing with pattern: ${config.mix_pattern || "PMMM"}`);
+  const patternStartOffset = getPatternStartOffset(
+    config.mix_pattern,
+    pinnedFirst.length > 0,
+  );
   const mixed = [
     ...pinnedFirst,
-    ...mixContent(mixableEpisodes, tracks, config.mix_pattern),
+    ...mixContent(
+      mixableEpisodes,
+      tracks,
+      config.mix_pattern,
+      patternStartOffset,
+    ),
   ];
 
   // Step 10: Push the final mixed playlist to Spotify
